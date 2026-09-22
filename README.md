@@ -54,6 +54,35 @@ flowchart LR
 
 **문서 업로드 → OCR 판독 → 스탭 확정 → 안내문 생성 · 안전 검증 → 의사 승인 → 발송 직전 원본 삭제 → 환자 인증 · 열람 · 챗봇**
 
+### 화면
+
+<sub>로컬 목 모드에서 합성 데이터로 촬영했습니다. 화면의 환자 · 직원 · 의원 이름은 모두 가상입니다.</sub>
+
+**스탭 — 판독 결과 확인.** 기계가 읽은 값은 스탭이 확정하기 전까지 쓰지 않습니다. 못 읽은 칸은 추측해서 채우지 않고 `?`로 비워 두고, 확신이 낮은 값은 「확인 필요」로, 문서마다 값이 다르면 「값 2개」로 세워 둡니다.
+
+![판독 결과 확인 — 진단 · 처방과 이번 판독 값](screens/hospital-ocr-review.png)
+
+**의사 — 검토 · 승인.** 환자가 받을 화면을 그대로 옆에 띄워 놓고 승인합니다. 결과가 아직 안 나온 검사는 「값이 빠진 자리」라고 먼저 알려 줍니다.
+
+![의사 검토 · 승인 — 원문과 환자 화면 미리보기](screens/hospital-doctor-review.png)
+
+**환자 — 문자 링크 하나로 여는 안내.** 앱 설치 없이 링크와 6자리 인증번호로 들어옵니다. 챗봇은 승인된 안내 안에서만 답하고, 약 변경처럼 안내에 없는 질문은 병원 문의로 돌립니다.
+
+<table>
+  <tr>
+    <td><img src="screens/patient-guide.png" width="200" alt="복약지도"></td>
+    <td><img src="screens/patient-care.png" width="200" alt="주의사항"></td>
+    <td><img src="screens/patient-life.png" width="200" alt="생활관리"></td>
+    <td><img src="screens/patient-chat.png" width="200" alt="챗봇"></td>
+  </tr>
+  <tr>
+    <td align="center">복약지도</td>
+    <td align="center">주의사항</td>
+    <td align="center">생활관리</td>
+    <td align="center">챗봇 — 근거 답변과 거절</td>
+  </tr>
+</table>
+
 ### 핵심 설계 원칙 — 틀린 안내는 없는 안내보다 위험하다
 
 | 의료 안전 최우선 | 안전하게 실패한다 |
@@ -84,6 +113,17 @@ flowchart LR
 - 처방을 **표 두 개로 구조화** — 복약안내가 「무엇을 언제까지」 말할 근거 ([#70](https://github.com/AI-HealthCare-05/AH_05_06/pull/70))
 - **대표 처방 × 안내 갈래** 설정과 **승인 문구 정본** — 설정 화면과 안내문 생성이 같은 글을 보게 ([#192](https://github.com/AI-HealthCare-05/AH_05_06/pull/192) · [#214](https://github.com/AI-HealthCare-05/AH_05_06/pull/214))
 - 어드민 — 직원 관리 · 의원 정보 · **감사 기록 조회** ([#285](https://github.com/AI-HealthCare-05/AH_05_06/pull/285) · [#287](https://github.com/AI-HealthCare-05/AH_05_06/pull/287) · [#295](https://github.com/AI-HealthCare-05/AH_05_06/pull/295))
+
+<table>
+  <tr>
+    <td><img src="screens/hospital-settings.png" alt="설정 — 대표 처방"></td>
+    <td><img src="screens/admin-audit-log.png" alt="어드민 — 전체 로그"></td>
+  </tr>
+  <tr>
+    <td>설정 · 대표 처방 — 진단 × 처방 세트마다 기본 약, 확인 항목, 자동 발송을 정한다</td>
+    <td>어드민 · 전체 로그 — 안내문 승인부터 문자 · 본인 확인 · 열람까지 진료 번호 하나로 따라간다. 토큰 · 전화번호 원문은 남기지 않는다</td>
+  </tr>
+</table>
 
 ### 3-3. 배포 · 운영 (Pilot)
 
@@ -133,6 +173,10 @@ flowchart LR
 | **원인** | Nginx 이미지는 테스트 파일 유출을 막으려고 폴더별로만 복사하는데, 로고용 `assets/` 폴더를 새로 만들면서 **복사 한 줄이 빠짐** → 운영에서 404 |
 | **해결** | 폴더 단위가 아니라 **화면이 가리키는 파일을 하나하나 이미지 목록과 대조하는 검사**를 추가. 이 검사가 같은 원인으로 **환자 안내 PDF 라이브러리도 404**인 것을 찾아냄 → 둘 다 복구 ([#369](https://github.com/AI-HealthCare-05/AH_05_06/pull/369)) |
 | **배운 점** | 조용히 비어 있는 실패가 가장 늦게 드러난다. **검사가 실제로 무는지** 일부러 깨뜨려(변이) 확인하는 습관을 들였다 |
+
+<img src="screens/patient-pdf.png" width="220" alt="복구된 환자 안내 PDF 미리보기">
+
+<sub>복구 뒤의 환자 안내 PDF 미리보기</sub>
 
 ### 그 밖에 막은 것
 
